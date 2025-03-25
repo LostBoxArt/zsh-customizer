@@ -3,7 +3,6 @@
 Zsh Customizer is a web application designed to simplify the process of creating and customizing your Zsh terminal environment, particularly when using [Oh My Zsh](https://ohmyz.sh/). It provides a user-friendly interface for selecting themes, managing plugins, designing prompts, and generating the necessary `.zshrc` configuration.
 
 
-
 ## Current Features
 
 *   **Theme Selection:** Browse and select from various Oh My Zsh themes.
@@ -52,7 +51,7 @@ The project aims to become a comprehensive tool for Zsh customization. Key areas
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/zsh-customizer.git # Replace with actual URL if available
+    git clone https://github.com/LostBoxArt/zsh-customizer.git
     cd zsh-customizer
     ```
 2.  Install dependencies:
@@ -88,5 +87,3 @@ Here are the general steps:
 4.  **Apply changes:** Restart your terminal or run `source ~/.zshrc`.
 
 Refer to the official Oh My Zsh documentation and the specific plugin's README for detailed instructions.
-
-
