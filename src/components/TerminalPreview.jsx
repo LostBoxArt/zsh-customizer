@@ -26,41 +26,104 @@ const baseColors = (darkMode) => ({
   brightBlue: darkMode ? '#8aadf4' : '#1e66f5',
   brightMagenta: darkMode ? '#f5bde6' : '#ea76cb',
   brightCyan: darkMode ? '#8bd5ca' : '#179299',
-  brightWhite: darkMode ? '#cad3f5' : '#4c4f69', // Bright White (Text)
+  brightWhite: darkMode ? '#cad3f5' : '#4c4f69', // Bright White (Text) - Default text color
 });
 
+// Define specific palettes for each theme based on image samples
+// Focus on background, foreground, and colors used in renderPrompt
 const themePalettes = {
-  'default': baseColors,
+  'default': baseColors, // Use base for the explicit 'default' if ever selected
   'agnoster': (darkMode) => ({
     ...baseColors(darkMode),
     background: darkMode ? '#2d2d2d' : '#f0f0f0',
     foreground: darkMode ? '#e0e0e0' : '#333333',
-    blue: darkMode ? '#589df6' : '#005fff',       // User/Host BG
-    black: darkMode ? '#444444' : '#bbbbbb',       // Path BG (gray)
-    green: darkMode ? '#9ece6a' : '#40a02b',       // Git BG / Path FG
-    white: darkMode ? '#ffffff' : '#000000',       // Text on user/host BG
-    brightBlack: darkMode ? '#000000' : '#ffffff', // Text on git BG
+    blue: darkMode ? '#589df6' : '#005fff',       // User/Host BG (ANSI blue)
+    black: darkMode ? '#444444' : '#bbbbbb',       // Path BG (gray) - Mapped to brightBlack ANSI bg
+    green: darkMode ? '#9ece6a' : '#40a02b',       // Git BG / Path FG (ANSI green)
+    white: darkMode ? '#ffffff' : '#000000',       // Text on user/host BG (ANSI white)
+    brightBlack: darkMode ? '#000000' : '#ffffff', // Text on git BG (ANSI black in dark mode)
+    // Ensure brightWhite is defined for path text on gray bg
+    brightWhite: darkMode ? '#e0e0e0' : '#333333', // Use foreground for brightWhite if needed
   }),
-  'robbyrussell': (darkMode) => ({
-    ...baseColors(darkMode),
-    cyan: darkMode ? '#89b4fa' : '#1e66f5', // Path color (blueish)
-    red: darkMode ? '#f38ba8' : '#d20f39',  // Arrow/Git color (reddish)
-  }),
-  'avit': (darkMode) => ({
-    ...baseColors(darkMode),
-    green: darkMode ? '#a6e3a1' : '#40a02b', // User@host
-    blue: darkMode ? '#89b4fa' : '#1e66f5',  // Path
-    cyan: darkMode ? '#94e2d5' : '#179299',  // Git
-  }),
-  'bira': (darkMode) => ({
-    ...baseColors(darkMode),
-    yellow: darkMode ? '#f9e2af' : '#df8e1d', // Path
-  }),
+  'robbyrussell': (darkMode) => { // Default OMZ theme
+    const base = baseColors(darkMode);
+    return {
+      ...base,
+      // Explicitly define colors used in its prompt
+      green: darkMode ? '#a6da95' : '#40a02b', // Arrow color (ANSI Green)
+      cyan: darkMode ? '#89b4fa' : '#1e66f5',  // Path color (ANSI Cyan for blueish)
+      red: darkMode ? '#f38ba8' : '#d20f39',   // Git color (ANSI Red)
+    };
+  },
+  'avit': (darkMode) => {
+    const base = baseColors(darkMode);
+    return {
+      ...base,
+      // Colors used in prompt
+      green: darkMode ? '#a6e3a1' : '#40a02b', // User@host (ANSI Green)
+      blue: darkMode ? '#89b4fa' : '#1e66f5',  // Path (ANSI Blue)
+      cyan: darkMode ? '#94e2d5' : '#179299',  // Git (ANSI Cyan)
+    };
+  },
+  'bira': (darkMode) => {
+     const base = baseColors(darkMode);
+    return {
+      ...base,
+      // Colors used in prompt
+      yellow: darkMode ? '#f9e2af' : '#df8e1d', // Path (ANSI Yellow)
+    };
+  },
+  'bureau': (darkMode) => {
+    const base = baseColors(darkMode);
+    return {
+      ...base,
+       // Colors used in prompt
+      cyan: darkMode ? '#94e2d5' : '#179299', // Git (ANSI Cyan)
+    };
+  },
+  'candy': (darkMode) => {
+     const base = baseColors(darkMode);
+    return {
+      ...base,
+       // Colors used in prompt
+      blue: darkMode ? '#89b4fa' : '#1e66f5', // Path (ANSI Blue)
+    };
+  },
+  'clean': (darkMode) => {
+    // Uses default colors entirely for the prompt
+    return baseColors(darkMode);
+  },
+  'dallas': (darkMode) => {
+    const base = baseColors(darkMode);
+    return {
+      ...base,
+       // Colors used in prompt
+      cyan: darkMode ? '#94e2d5' : '#179299', // Git (ANSI Cyan)
+    };
+  },
+  'fino': (darkMode) => {
+     const base = baseColors(darkMode);
+    return {
+      ...base,
+       // Colors used in prompt
+      blue: darkMode ? '#89b4fa' : '#1e66f5', // Path (ANSI Blue)
+    };
+  },
+  'gnzh': (darkMode) => {
+    const base = baseColors(darkMode);
+    return {
+      ...base,
+       // Colors used in prompt
+      cyan: darkMode ? '#94e2d5' : '#179299', // Git (ANSI Cyan)
+    };
+  },
 };
 
 const getThemeOptions = (themeName, darkMode) => {
-  const paletteGetter = themePalettes[themeName] || themePalettes['default'];
-  return paletteGetter(darkMode);
+  // Fallback to robbyrussell's palette if the specific theme isn't defined
+  // This ensures the default prompt rendering uses robbyrussell colors
+  const getter = themePalettes[themeName] || themePalettes['robbyrussell'];
+  return getter(darkMode);
 };
 
 // --- Prompt Simulation ---
@@ -83,12 +146,13 @@ const renderPrompt = (themeName, darkMode) => {
   // FG Bright
   const fgBrightBlack = '\x1b[90m'; const fgBrightWhite = '\x1b[97m';
   // BG Basic
-  const bgBlack = '\x1b[40m'; const bgRed = '\x1b[41m'; const bgGreen = '\x1b[42m';
-  const bgYellow = '\x1b[43m'; const bgBlue = '\x1b[44m'; const bgMagenta = '\x1b[45m';
-  const bgCyan = '\x1b[46m'; const bgWhite = '\x1b[47m';
+  const bgBlack = '\x1b[40m'; const bgGreen = '\x1b[42m';
+  const bgBlue = '\x1b[44m';
+  const bgWhite = '\x1b[47m';
   // BG Bright
-  const bgBrightBlack = '\x1b[100m'; const bgBrightWhite = '\x1b[107m';
+  const bgBrightBlack = '\x1b[100m'; // Used for Agnoster gray background
 
+  // Get the theme options primarily for background color determination
   const themeOpts = getThemeOptions(themeName, darkMode);
   const defaultFg = darkMode ? fgBrightWhite : fgBlack;
   // Determine terminal background ANSI code for ending powerline arrows
@@ -97,83 +161,107 @@ const renderPrompt = (themeName, darkMode) => {
   if (termBgHex === '#ffffff' || termBgHex === '#f0f0f0') { termBgCode = bgWhite; }
   else if (termBgHex === '#2d2d2d') { termBgCode = bgBlack; }
 
-  // Helper to get ANSI code - simplified for known palette colors
-  const getFgCode = (hex) => {
-      if (!hex) return defaultFg;
-      if (hex === themeOpts.foreground) return defaultFg;
-      if (hex === themeOpts.red) return fgRed; if (hex === themeOpts.green) return fgGreen;
-      if (hex === themeOpts.yellow) return fgYellow; if (hex === themeOpts.blue) return fgBlue;
-      if (hex === themeOpts.magenta) return fgMagenta; if (hex === themeOpts.cyan) return fgCyan;
-      if (hex === themeOpts.white) return fgWhite; if (hex === themeOpts.black) return fgBlack;
-      if (hex === themeOpts.brightBlack) return fgBrightBlack; if (hex === themeOpts.brightWhite) return fgBrightWhite;
-      const base = baseColors(darkMode);
-      if (hex === base.red) return fgRed; if (hex === base.green) return fgGreen;
-      if (hex === base.yellow) return fgYellow; if (hex === base.blue) return fgBlue;
-      if (hex === base.magenta) return fgMagenta; if (hex === base.cyan) return fgCyan;
-      return defaultFg;
-  };
-   const getBgCode = (hex) => {
-      if (!hex) return termBgCode;
-      if (hex === themeOpts.background) return termBgCode;
-      if (hex === themeOpts.blue) return bgBlue;
-      if (hex === themeOpts.black) return darkMode ? bgBrightBlack : bgWhite; // Gray BG for agnoster path
-      if (hex === themeOpts.green) return bgGreen;
-      return termBgCode;
-  };
 
+  // Render prompts using direct ANSI codes based on images
   switch (themeName) {
-    case 'agnoster':
-      // Screenshot: [ user@host ](blue_bg/white_fg) > [ ~ ](gray_bg/white_fg) > [ git:(main) ](green_bg/black_fg) >
-      const userBg = getBgCode(themeOpts.blue);
-      const pathBg = getBgCode(themeOpts.black); // Gray BG
-      const gitBg = getBgCode(themeOpts.green);
-      const userFg = getFgCode(themeOpts.white); // White text on blue
-      const pathFg = getFgCode(themeOpts.brightWhite); // White text on gray
-      const gitFg = getFgCode(themeOpts.brightBlack); // Black text on green
+    case 'agnoster': {
+      // Image: [user@host](blue_bg/white_fg) > [~/p/zsh-customizer](gray_bg/white_fg) > [git:(main)](green_bg/black_fg) >
+      const agnosterPath = '~/p/zsh-customizer';
+      // Use direct ANSI codes
+      const userHostSegment = `${bgBlue}${fgWhite}${bold} ${user}@${host} ${reset}`;
+      const pathSegment = `${bgBrightBlack}${fgBrightWhite}${bold} ${agnosterPath} ${reset}`; // bgBrightBlack for gray
+      const gitSegment = `${bgGreen}${fgBlack}${bold} git:(main) ${reset}`; // black fg on green bg
 
-      const userHostSegment = `${userBg}${userFg}${bold} ${user}@${host} ${reset}`;
-      const pathSegment = `${pathBg}${pathFg}${bold} ${path} ${reset}`;
-      const gitSegment = `${gitBg}${gitFg}${bold} ${gitSymbol} ${gitBranch} ${reset}`;
-
-      const arrow1 = `${userBg}${pathBg === bgBrightBlack ? fgBrightBlack : fgWhite}${powerlineArrow}${reset}`;
-      const arrow2 = `${pathBg}${gitBg === bgGreen ? fgGreen : fgBlack}${powerlineArrow}${reset}`;
-      // Arrow into default background: fg is the last segment's bg color
-      const arrow3Fg = getFgCode(termBgHex === themeOpts.background ? themeOpts.foreground : (darkMode ? themeOpts.black : themeOpts.white));
-      const arrow3 = `${gitBg}${arrow3Fg}${powerlineArrow}${reset}`;
+      // Corrected Arrows: FG=Prev_BG, BG=Next_BG
+      const arrow1 = `${fgBlue}${bgBrightBlack}${powerlineArrow}${reset}`; // FG=Blue (Prev BG), BG=Gray (Next BG)
+      const arrow2 = `${fgBrightBlack}${bgGreen}${powerlineArrow}${reset}`; // FG=Gray (Prev BG), BG=Green (Next BG)
+      const arrow3 = `${fgGreen}${termBgCode}${powerlineArrow}${reset}`;   // FG=Green (Prev BG), BG=Terminal BG
 
       return `${userHostSegment}${arrow1}${pathSegment}${arrow2}${gitSegment}${arrow3} `;
-
-    case 'robbyrussell':
-      // Screenshot: [~](blueish,bold) [git:(main)](reddish) ❯(reddish,bold)
-      const robbyPathFg = getFgCode(themeOpts.cyan); // Use the specific cyan/blue
-      const robbyGitFg = getFgCode(themeOpts.red);   // Use the specific red/pink
-      const robbyPath = `${robbyPathFg}${bold}${path}${reset}`;
-      // Simulating the git part structure from screenshot
-      const robbyGit = ` ${robbyGitFg}${gitSymbol} git:(${gitBranch})${reset}`; // Added space before git
-      const robbyArrow = ` ${robbyGitFg}${bold}${simpleArrow}${reset}`; // Added space before arrow
-      return `${robbyPath}${robbyGit}${robbyArrow} `;
-
-    case 'avit':
-      // Screenshot: [user@host](green):[~](blue) [git:(main)](cyan) >(default)
-      const avitUserHostFg = getFgCode(themeOpts.green);
-      const avitPathFg = getFgCode(themeOpts.blue);
-      const avitGitFg = getFgCode(themeOpts.cyan);
-      const avitUserHost = `${avitUserHostFg}${user}@${host}${reset}`;
-      const avitPath = `${avitPathFg}${path}${reset}`;
-      const avitGit = ` ${avitGitFg}${gitSymbol} git:(${gitBranch})${reset}`; // Added space
-      const avitArrow = ` ${defaultFg}>${reset}`; // Added space
-      return `${avitUserHost}:${avitPath}${avitGit}${avitArrow} `;
-
-    case 'bira':
-       // Screenshot: user@host:[~](yellow)$(default)
-      const biraUserHostFg = defaultFg;
-      const biraPathFg = getFgCode(themeOpts.yellow);
-      const biraUserHost = `${biraUserHostFg}${user}@${host}${reset}`;
-      const biraPath = `${biraPathFg}${path}${reset}`;
-      return `${biraUserHost}:${biraPath}$ ${reset}`;
-
-    default:
-      return `${defaultFg}${user}@${host}:${path}$ ${reset}`;
+    }
+    case 'robbyrussell': {
+      // Image: ➜ ~ git:(main)  (Green arrow, blue path, red git)
+      const startArrow = `${fgGreen}${bold}➜${reset} `;
+      const pathSegment = `${fgCyan}${bold}${path}${reset}`; // Use fgCyan for blueish path
+      const gitSegment = ` ${fgRed}git:(${gitBranch})${reset}`;
+      return `${startArrow}${pathSegment}${gitSegment} `;
+    }
+    case 'avit': {
+      // Image: user@host:~/p/zsh-customizer main ❯ (Green user@host, blue path, cyan git, default arrow)
+      const avitPath = '~/p/zsh-customizer';
+      const avitGitBranch = 'main';
+      const avitUserHost = `${fgGreen}${user}@${host}${reset}`;
+      const pathSegment = `${fgBlue}${avitPath}${reset}`;
+      const gitSegment = ` ${fgCyan}${avitGitBranch}${reset}`;
+      const avitArrow = ` ${defaultFg}${simpleArrow}${reset}`;
+      return `${avitUserHost}:${pathSegment}${gitSegment}${avitArrow} `;
+    }
+    case 'bira': {
+       // Image: user@host:~/projects\n➜ (Default user@host, yellow path, default arrow on newline)
+       const biraPath = '~/projects';
+      const biraUserHost = `${defaultFg}${user}@${host}${reset}`;
+      const pathSegment = `${fgYellow}${biraPath}${reset}`;
+      const biraArrow = `${defaultFg}➜${reset}`;
+      return `${biraUserHost}:${pathSegment}\r\n${biraArrow} `;
+    }
+     case 'bureau': {
+      // Image: user@host ~/p/zsh-customizer [main] ❯ (Default user/host/path/arrow, cyan git)
+      const bureauPath = '~/p/zsh-customizer';
+      const bureauGitBranch = 'main';
+      const userHostPath = `${defaultFg}${user}@${host} ${bureauPath}${reset}`;
+      const gitSegment = ` ${fgCyan}[${bureauGitBranch}]${reset}`; // Cyan git
+      const arrowSegment = ` ${defaultFg}${simpleArrow}${reset}`;
+      return `${userHostPath}${gitSegment}${arrowSegment} `;
+    }
+    case 'candy': {
+       // Image: ~/p/zsh-customizer main ❯ (Blue path, default git/arrow)
+       const candyPath = '~/p/zsh-customizer';
+       const candyGitBranch = 'main';
+       const pathSegment = `${fgBlue}${candyPath}${reset}`; // Blue path
+       const gitSegment = ` ${defaultFg}${candyGitBranch}${reset}`;
+       const arrowSegment = ` ${defaultFg}${simpleArrow}${reset}`;
+       return `${pathSegment}${gitSegment}${arrowSegment} `;
+    }
+     case 'clean': {
+      // Image: user@host:~> (Default user/host/path/arrow)
+      const cleanPath = '~';
+      const userHostPath = `${defaultFg}${user}@${host}:${cleanPath}${reset}`;
+      const arrowSegment = `${defaultFg}>${reset}`;
+      return `${userHostPath}${arrowSegment} `;
+    }
+    case 'dallas': {
+      // Image: user@host:~/projects (main) $ (Default user/host/path/symbol, cyan git)
+      const dallasPath = '~/projects';
+      const dallasGitBranch = 'main';
+      const userHostPath = `${defaultFg}${user}@${host}:${dallasPath}${reset}`;
+      const gitSegment = ` ${fgCyan}(${dallasGitBranch})${reset}`; // Cyan git
+      const symbolSegment = ` ${defaultFg}$${reset}`;
+      return `${userHostPath}${gitSegment}${symbolSegment} `;
+    }
+    case 'fino': {
+      // Image: ~/p/zsh-customizer [main] :: (Blue path, default git/symbol)
+      const finoPath = '~/p/zsh-customizer';
+      const finoGitBranch = 'main';
+      const pathSegment = `${fgBlue}${finoPath}${reset}`; // Blue path
+      const gitSegment = ` ${defaultFg}[${finoGitBranch}]${reset}`;
+      const symbolSegment = ` ${defaultFg}::${reset}`;
+      return `${pathSegment}${gitSegment}${symbolSegment} `;
+    }
+    case 'gnzh': {
+      // Image: user@host ~/p/zsh-customizer (main) ❯ (Default user/host/path/arrow, cyan git)
+      const gnzhPath = '~/p/zsh-customizer';
+      const gnzhGitBranch = 'main';
+      const userHostPath = `${defaultFg}${user}@${host} ${gnzhPath}${reset}`;
+      const gnzhGitSegment = ` ${fgCyan}(${gnzhGitBranch})${reset}`; // Cyan git
+      const gnzhArrowSegment = ` ${defaultFg}${simpleArrow}${reset}`;
+      return `${userHostPath}${gnzhGitSegment}${gnzhArrowSegment} `;
+    }
+    default: { // Fallback for any other theme or 'default' - Use explicit robbyrussell style
+      const startArrow = `${fgGreen}${bold}➜${reset} `;
+      const pathSegment = `${fgCyan}${bold}${path}${reset}`;
+      const gitSegment = ` ${fgRed}git:(${gitBranch})${reset}`;
+      return `${startArrow}${pathSegment}${gitSegment} `;
+    }
   }
 };
 // --- End Prompt Simulation ---

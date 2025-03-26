@@ -4,10 +4,20 @@ import Navbar from './components/Navbar'
 import ThemeCard from './components/ThemeCard'
 import PluginCard from './components/PluginCard'
 import TerminalPreview from './components/TerminalPreview'
-import ConfigurationSection from './components/ConfigurationSection'
-import PromptDesigner from './components/PromptDesigner'
-import ThemeGuide from './components/ThemeGuide'
-import { useTheme } from './contexts/theme-hook' // Updated import path
+// Keep original ConfigurationSection import for now, as ConfigSection uses it
+import ConfigurationSection from './components/ConfigurationSection'; 
+import PromptDesigner from './components/PromptDesigner';
+import ThemeGuide from './components/ThemeGuide';
+import { useTheme } from './contexts/theme-hook'; // Updated import path
+// Removed data imports as they are now used in section components
+// import { themes } from './data/themes'; 
+// import { plugins } from './data/plugins'; 
+
+// Import new section components
+import ThemesSection from './components/sections/ThemesSection';
+import PluginsSection from './components/sections/PluginsSection';
+import TerminalSection from './components/sections/TerminalSection';
+import ConfigSection from './components/sections/ConfigSection';
 
 function App() {
   const { showThemeGuide } = useTheme();
@@ -17,143 +27,6 @@ function App() {
   const [customPrompt, setCustomPrompt] = useState('');
   const [zshConfig, setZshConfig] = useState('');
   const [showGuide, setShowGuide] = useState(showThemeGuide);
-
-  // Popular Oh My Zsh themes from the official repository
-  const themes = [
-    { 
-      id: 'robbyrussell',
-      name: 'Robbyrussell (Default)',
-      description: 'The default theme - clean, simple, compatible',
-      preview: '➜  ~ git:(main)', // More typical representation
-      bgColor: '#1a1b26',
-      textColor: '#a9b1d6',
-      accentColor: '#7aa2f7'
-    },
-    { 
-      id: 'agnoster',
-      name: 'Agnoster',
-      description: 'A popular powerline-based theme',
-      preview: 'user@host ~/p/zsh-customizer git:(main) ', // More accurate text representation
-      bgColor: '#1a1b26',
-      textColor: '#c0caf5',
-      accentColor: '#bb9af7',
-      powerlineSymbol: ''
-    },
-    { 
-      id: 'avit',
-      name: 'Avit',
-      description: 'Minimalist theme with git info',
-      preview: '~/p/zsh-customizer main ❯', // Shorter path, branch
-    },
-    { 
-      id: 'bira',
-      name: 'Bira',
-      description: 'Two-line prompt with ruby version',
-      preview: 'user@host:~/projects\n➜'
-    },
-    { 
-      id: 'bureau',
-      name: 'Bureau',
-      description: 'Modern and informative theme',
-      preview: 'user@host ~/p/zsh-customizer [main] ❯', // Simplified
-    },
-    { 
-      id: 'candy',
-      name: 'Candy',
-      description: 'Sweet and colorful theme',
-      preview: '~/p/zsh-customizer main ❯', // Simplified
-    },
-    { 
-      id: 'clean',
-      name: 'Clean',
-      description: 'Simple and uncluttered look',
-      preview: 'user@host:~>', // Simplified
-    },
-    { 
-      id: 'dallas',
-      name: 'Dallas',
-      description: 'Minimal with git branch',
-      preview: 'user@host:~/projects (main) $'
-    },
-    { 
-      id: 'fino',
-      name: 'Fino',
-      description: 'Simple yet informative',
-      preview: '~/p/zsh-customizer [main] ∴', // Reversed order, shorter path
-    },
-    { 
-      id: 'gnzh',
-      name: 'Gnzh',
-      description: 'Fancy prompt with git info',
-      preview: 'user@host ~/p/zsh-customizer (main) ❯', // Simplified
-    }
-  ];
-
-  // Popular Oh My Zsh plugins with descriptions from the official repository
-  const plugins = [
-    { 
-      id: 'git',
-      name: 'Git',
-      description: 'Provides many aliases and functions for Git workflow',
-      commands: ['gst', 'ga', 'gcmsg', 'gp']
-    },
-    { 
-      id: 'docker',
-      name: 'Docker',
-      description: 'Adds auto-completion and aliases for Docker commands',
-      commands: ['dk', 'dkc', 'dki', 'dkps']
-    },
-    { 
-      id: 'npm',
-      name: 'NPM',
-      description: 'Completion and aliases for npm commands',
-      commands: ['npmg', 'npmO', 'npmL']
-    },
-    { 
-      id: 'sudo',
-      name: 'Sudo',
-      description: 'Press ESC twice to add sudo to the current command',
-      commands: ['ESC ESC']
-    },
-    { 
-      id: 'z',
-      name: 'Z',
-      description: 'Jump to frequently visited directories',
-      commands: ['z dirname']
-    },
-    { 
-      id: 'history',
-      name: 'History',
-      description: 'Aliases for history command and searching',
-      commands: ['h', 'hs', 'hsi']
-    },
-    { 
-      id: 'extract',
-      name: 'Extract',
-      description: 'Extract any archive file with a single command',
-      commands: ['x filename.tar.gz']
-    },
-    { 
-      id: 'autojump',
-      name: 'Autojump',
-      description: 'Smart directory jumping using j command',
-      commands: ['j dirname']
-    },
-    { 
-      id: 'zsh-autosuggestions',
-      name: 'Autosuggestions',
-      description: 'Fish-like suggestions based on command history',
-      commands: ['→ to accept'],
-      installation: `git clone https://github.com/zsh-users/zsh-autosuggestions $\{ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions`
-    },
-    { 
-      id: 'zsh-syntax-highlighting',
-      name: 'Syntax Highlighting',
-      description: 'Fish-like syntax highlighting for commands',
-      commands: ['real-time highlighting'],
-      installation: `git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $\{ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting`
-    }
-  ];
 
   // Generate .zshrc configuration
   const generateConfig = useCallback(() => {
@@ -235,89 +108,34 @@ PROMPT="${customPrompt}"
     switch (activeTab) {
       case 'themes':
         return (
-          <section className="animate-fadeIn">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">Choose a Theme</h2>
-              <p className="text-gray-600 dark:text-gray-300">Select from popular Oh My Zsh themes. Each theme provides a unique look for your terminal.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {themes.map((theme) => (
-                <ThemeCard 
-                  key={theme.id}
-                  theme={theme}
-                  isSelected={selectedTheme === theme.id}
-                  onClick={() => setSelectedTheme(theme.id)}
-                />
-              ))}
-            </div>
-          </section>
+          <ThemesSection 
+            selectedTheme={selectedTheme}
+            onThemeSelect={setSelectedTheme}
+          />
         );
       case 'plugins':
         return (
-          <section className="animate-fadeIn">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">Select Plugins</h2>
-              <p className="text-gray-600 dark:text-gray-300">Choose plugins to enhance your terminal experience. Each plugin adds useful features and shortcuts. <strong className="text-yellow-600 dark:text-yellow-400">Note:</strong> Some plugins (like Autosuggestions and Syntax Highlighting) require manual installation steps, which will be shown in the 'Generated Configuration' tab if selected.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-              {plugins.map((plugin) => (
-                <PluginCard 
-                  key={plugin.id}
-                  plugin={plugin}
-                  isSelected={selectedPlugins.includes(plugin.id)}
-                  onToggle={() => togglePlugin(plugin.id)}
-                />
-              ))}
-            </div>
-          </section>
+          <PluginsSection 
+            selectedPlugins={selectedPlugins}
+            onPluginToggle={togglePlugin}
+          />
         );
       case 'terminal':
         return (
-          <section className="animate-fadeIn">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">Terminal Preview</h2>
-              <p className="text-gray-600 dark:text-gray-300">See how your terminal will look with the selected theme and plugins.</p>
-            </div>
-            <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-              <TerminalPreview 
-                selectedTheme={selectedTheme}
-                selectedPlugins={selectedPlugins}
-              />
-            </div>
-            <div className="mt-8">
-              <div className="mb-6">
-                <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">Customize Prompt</h2>
-                <p className="text-gray-600 dark:text-gray-300">Create your own custom prompt or use the theme's default.</p>
-              </div>
-              <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-                <PromptDesigner 
-                  value={customPrompt}
-                  onChange={setCustomPrompt}
-                  onApply={generateConfig}
-                />
-              </div>
-            </div>
-          </section>
+          <TerminalSection 
+            selectedTheme={selectedTheme}
+            selectedPlugins={selectedPlugins}
+            customPrompt={customPrompt}
+            onPromptChange={setCustomPrompt}
+            onPromptApply={generateConfig}
+          />
         );
       case 'config':
         return (
-          <section className="animate-fadeIn">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-2 text-gray-900 dark:text-white">Generated Configuration</h2>
-              <p className="text-gray-600 dark:text-gray-300">Your customized Zsh configuration is ready. Copy it to your .zshrc file to apply the changes.</p>
-            </div>
-            <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg">
-              <ConfigurationSection 
-                zshConfig={zshConfig}
-                plugins={plugins} // Pass full plugins array
-                selectedPlugins={selectedPlugins} // Pass selected plugin IDs
-                onCopy={() => {
-                  navigator.clipboard.writeText(zshConfig);
-                  alert('Configuration copied to clipboard!');
-                }}
-              />
-            </div>
-          </section>
+          <ConfigSection 
+            zshConfig={zshConfig}
+            selectedPlugins={selectedPlugins}
+          />
         );
       default:
         return null;

@@ -33,18 +33,14 @@ function ThemeCard({ theme, isSelected, onClick }) {
       }}>
         <div className="flex items-center text-sm p-1.5" style={{ background: theme.accentColor || '#32344a' }}>
           <span className="mr-2"></span>
-          <span>{theme.name}</span>
-        </div>
-        <div className="p-2 space-y-1">
-          <div className="flex items-center">
-            <span className="mr-2">❯</span>
-            <span style={{ color: theme.accentColor || '#7aa2f7' }}>zsh</span>
-            <span className="mx-2" style={{ color: theme.textColor || '#a9b1d6' }}></span>
-            <span style={{ color: theme.accentColor || '#7aa2f7' }}>main</span>
-          </div>
-          <div className="flex">
-            <span style={{ color: '#9ece6a' }}>✔</span>
-            <span className="ml-2" style={{ color: theme.textColor }}>{theme.preview}</span>
+           <span>{theme.name}</span>
+         </div>
+         {/* Removed hardcoded prompt structure */}
+         <div className="p-2"> 
+           {/* Display only the theme.preview with a leading symbol and handle newlines */}
+           <div className="flex items-start"> 
+             <span className="mr-2" style={{ color: theme.accentColor || '#7aa2f7' }}>❯</span> 
+             <span style={{ color: theme.textColor, whiteSpace: 'pre-wrap' }}>{theme.preview}</span>
           </div>
         </div>
       </div>
